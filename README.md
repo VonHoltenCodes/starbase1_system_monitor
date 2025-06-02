@@ -1,6 +1,19 @@
 # Starbase1_IO System Monitor
 
+⚠️ **DEVELOPMENT VERSION - USE WITH CAUTION** ⚠️
+
 A retro Windows 95-themed system monitoring dashboard that runs in Docker containers. Monitor your system's performance with authentic 90s nostalgia!
+
+## 🚧 Current Status: IN DEVELOPMENT
+
+This project is currently under active development. The Windows installer has known issues with Docker detection that are being debugged.
+
+### Known Issues:
+- Windows `install.bat` fails to detect Docker Desktop even when running
+- Docker detection logic needs debugging on Windows systems
+- Container startup may fail due to detection issues
+
+**For testing:** Use manual Docker commands until installer is fixed.
 
 ![Starbase1_IO Dashboard](https://via.placeholder.com/800x600/c0c0c0/000000?text=Windows+95+System+Monitor)
 
@@ -15,12 +28,22 @@ A retro Windows 95-themed system monitoring dashboard that runs in Docker contai
 
 ## Quick Start
 
-### Windows
+### Windows (⚠️ KNOWN ISSUES)
 **Prerequisites:** Install Docker Desktop from https://www.docker.com/products/docker-desktop
 
-1. Download and double-click `install.bat`
-2. The installer will guide you through Docker setup if needed
-3. The dashboard will automatically open in your browser
+**Current Status:** The Windows installer has Docker detection issues. Use manual installation below.
+
+~~1. Download and double-click `install.bat`~~
+~~2. The installer will guide you through Docker setup if needed~~
+~~3. The dashboard will automatically open in your browser~~
+
+**Manual Installation for Windows:**
+```cmd
+git clone https://github.com/VonHoltenCodes/starbase1_system_monitor.git
+cd starbase1_system_monitor
+docker build -t starbase1-monitor .
+docker run -d --name starbase1_system_monitor -p 8080:8080 starbase1-monitor
+```
 
 ### macOS
 **Prerequisites:** Install Docker Desktop from https://www.docker.com/products/docker-desktop
@@ -108,6 +131,33 @@ docker run -d \
 - **Menu Bar** - File, View, Tools, and Help menus
 - **Status Bar** - Current time and system status
 - **Taskbar** - Start button and running applications
+
+## 🐛 Debugging & Development Notes
+
+### Windows Installer Issues
+The Windows `install.bat` has persistent Docker detection failures. Debugging efforts:
+
+1. **Tried Methods:**
+   - `docker --version` - Works but doesn't verify daemon
+   - `docker info` - Should work but detection fails
+   - `docker ps` with string parsing - Still failing
+   - `where docker` command - Inconsistent results
+
+2. **Next Debug Steps:**
+   - Test individual Docker commands in isolation
+   - Check Windows PATH and environment variables
+   - Verify Docker Desktop integration with CMD
+   - Test with different Windows versions/configurations
+
+3. **Workaround:**
+   Use manual Docker commands until installer is fixed
+
+### Container Status
+- ✅ Dockerfile builds successfully
+- ✅ Windows 95 UI files are correct
+- ✅ Flask app runs properly
+- ❌ Windows installer detection logic
+- ✅ Manual Docker run works
 
 ## Troubleshooting
 
