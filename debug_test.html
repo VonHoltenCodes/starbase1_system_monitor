@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Dashboard Debug Test</h1>
+    
+    <h2>API Test</h2>
+    <button onclick="testAPI()">Test System API</button>
+    <pre id="api-result"></pre>
+    
+    <h2>Element Test</h2>
+    <p>CPU Model: <span id="cpuModel">Loading...</span></p>
+    <p>CPU Usage: <span id="cpuUsage">Loading...</span></p>
+    <p>Memory Used: <span id="memoryUsed">Loading...</span></p>
+    
+    <button onclick="testUpdate()">Test Update Elements</button>
+    
+    <h2>Console Output</h2>
+    <pre id="console-output"></pre>
+
+    <script>
+        // Capture console output
+        const output = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            output.textContent += 'LOG: ' + args.join(' ') + '\n';
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            output.textContent += 'ERROR: ' + args.join(' ') + '\n';
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            output.textContent += 'WARN: ' + args.join(' ') + '\n';
+            originalWarn.apply(console, args);
+        };
+        
+        async function testAPI() {
+            try {
+                console.log('Fetching /api/system...');
+                const response = await fetch('/api/system');
+                const data = await response.json();
+                
+                document.getElementById('api-result').textContent = JSON.stringify(data, null, 2);
+                console.log('API returned:', data);
+                
+                // Try to update elements with the data
+                if (data.cpu) {
+                    updateElement('cpuModel', data.cpu.model || 'No model');
+                    updateElement('cpuUsage', data.cpu.usage ? `${data.cpu.usage}%` : 'No usage');
+                }
+                
+                if (data.memory) {
+                    updateElement('memoryUsed', `${data.memory.used} bytes`);
+                }
+                
+            } catch (error) {
+                console.error('API test failed:', error);
+                document.getElementById('api-result').textContent = 'Error: ' + error;
+            }
+        }
+        
+        function updateElement(id, value) {
+            console.log(`Updating element '${id}' with value '${value}'`);
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+                console.log(`Successfully updated ${id}`);
+            } else {
+                console.error(`Element with id '${id}' not found!`);
+            }
+        }
+        
+        function testUpdate() {
+            console.log('Testing direct updates...');
+            updateElement('cpuModel', 'Test CPU Model');
+            updateElement('cpuUsage', '50%');
+            updateElement('memoryUsed', '8 GB');
+            updateElement('nonExistent', 'This should fail');
+        }
+        
+        // Test on load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, ready for testing');
+        });
+    </script>
+</body>
+</html>

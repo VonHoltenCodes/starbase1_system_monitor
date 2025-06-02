@@ -15,6 +15,15 @@ def index():
     """Main dashboard view"""
     return render_template('dashboard.html')
 
+@app.route('/debug')
+def debug():
+    """Debug test page"""
+    try:
+        with open('debug_test.html', 'r') as f:
+            return f.read()
+    except:
+        return "Debug test file not found", 404
+
 @app.route('/api/system')
 def api_system():
     """Return static system data matching dashboard.js expectations"""
