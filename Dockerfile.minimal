@@ -6,7 +6,7 @@ WORKDIR /app
 RUN pip install flask
 
 # Copy only essential files
-COPY app_minimal.py ./
+COPY app_minimal_fixed.py ./app_minimal.py
 COPY templates/ ./templates/
 COPY static/ ./static/
 

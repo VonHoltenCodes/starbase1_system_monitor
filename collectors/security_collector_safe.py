@@ -23,9 +23,9 @@ class SecurityCollector:
         if self.is_container:
             # Return container user info
             return [{
-                'username': 'container',
+                'name': 'container',  # dashboard.js expects 'name' not 'username'
                 'terminal': 'docker',
-                'login_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+                'started': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),  # expects 'started'
                 'status': 'active'
             }]
             
@@ -38,9 +38,9 @@ class SecurityCollector:
                 # Fallback to current user
                 import getpass
                 return [{
-                    'username': getpass.getuser(),
+                    'name': getpass.getuser(),
                     'terminal': 'system',
-                    'login_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    'started': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
                     'status': 'active'
                 }]
             
@@ -49,16 +49,16 @@ class SecurityCollector:
                     parts = line.split()
                     if len(parts) >= 3:
                         user = {
-                            'username': parts[0],
+                            'name': parts[0],
                             'terminal': parts[1],
-                            'login_time': ' '.join(parts[2:4]) if len(parts) >= 4 else parts[2],
+                            'started': ' '.join(parts[2:4]) if len(parts) >= 4 else parts[2],
                             'status': 'active'
                         }
                         users.append(user)
             
-            return users if users else [{'username': 'unknown', 'status': 'no active users'}]
+            return users if users else [{'name': 'unknown', 'status': 'no active users'}]
         except Exception as e:
-            return [{'username': 'error', 'status': f'Failed to get users: {str(e)}'}]
+            return [{'name': 'error', 'status': f'Failed to get users: {str(e)}'}]
     
     def get_failed_logins(self, hours: int = 24) -> Dict[str, Any]:
         """Get failed login attempts from last N hours"""
@@ -147,9 +147,15 @@ class SecurityCollector:
             else:
                 overall_status = 'good'
             
+            # Extract the last failure time if available
+            last_failure = None
+            if failed_logins.get('attempts') and len(failed_logins['attempts']) > 0:
+                last_failure = failed_logins['attempts'][0].get('timestamp', 'Unknown')
+            
             return {
                 'active_users': active_users,
-                'failed_logins': failed_logins,
+                'failed_logins': failed_logins.get('total', 0),  # dashboard.js expects a number
+                'last_failure': last_failure,
                 'overall_status': overall_status,
                 'last_updated': datetime.datetime.now().isoformat(),
                 'environment': 'container' if self.is_container else 'host'
@@ -158,7 +164,7 @@ class SecurityCollector:
             return {
                 'error': str(e),
                 'active_users': [],
-                'failed_logins': {'total': 0, 'attempts': []},
+                'failed_logins': 0,  # dashboard.js expects a number
                 'overall_status': 'unknown',
                 'last_updated': datetime.datetime.now().isoformat()
             }

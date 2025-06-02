@@ -21,7 +21,7 @@ def api_system():
     return jsonify({
         'cpu': {
             'model': 'Test CPU (Container Mode)',
-            'usage_percent': 25.5,
+            'usage': 25.5,  # Changed from usage_percent
             'physical_cores': 4,
             'logical_cores': 8,
             'frequency': 2400.0

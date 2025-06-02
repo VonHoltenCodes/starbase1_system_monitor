@@ -29,7 +29,7 @@ class SystemCollector:
                 'physical_cores': psutil.cpu_count(logical=False) or 2,
                 'logical_cores': psutil.cpu_count(logical=True) or 4,
                 'frequency': cpu_freq.current if cpu_freq else 2400.0,
-                'usage_percent': cpu_percent
+                'usage': cpu_percent  # dashboard.js expects 'usage' not 'usage_percent'
             }
         except Exception:
             return {
@@ -37,7 +37,7 @@ class SystemCollector:
                 'physical_cores': 2,
                 'logical_cores': 4,
                 'frequency': 2400.0,
-                'usage_percent': 0
+                'usage': 0
             }
     
     def get_memory_info(self) -> Dict[str, Any]:
