@@ -13,4 +13,4 @@ EXPOSE 8080
 
 ENV CONTAINER_MODE=true
 
-CMD ["python", "app_simple.py"]
+CMD ["python", "app.py"]

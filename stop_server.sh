@@ -2,7 +2,7 @@
 
 # Starbase1_IO CLI Terminal Interface Stop Script
 
-cd /home/traxx/starbase1_IO
+cd /home/traxx/starbase1_system_monitor
 
 echo ">>> Stopping Starbase1_IO CLI Terminal Interface..."
 

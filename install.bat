@@ -10,7 +10,7 @@ echo.
 REM Check if Docker is installed and running
 echo [1/4] Checking Docker installation...
 
-REM Test Docker (same as working test_container.bat)
+REM First check if Docker is installed
 docker --version >nul 2>&1
 if errorlevel 1 (
     echo.
@@ -18,6 +18,19 @@ if errorlevel 1 (
     echo.
     echo  Please install Docker Desktop from:
     echo  https://www.docker.com/products/docker-desktop
+    echo.
+    pause
+    exit /b 1
+)
+
+REM Now check if Docker daemon is actually running
+docker ps >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo  ❌ Docker Desktop is installed but not running
+    echo.
+    echo  Please start Docker Desktop and wait for it to fully initialize
+    echo  Then run this installer again
     echo.
     pause
     exit /b 1
@@ -32,26 +45,43 @@ docker rm starbase1_system_monitor >nul 2>&1
 echo  ✓ Cleanup complete
 
 echo [3/4] Building and starting Starbase1 System Monitor...
-echo  Building image locally...
-docker build -t starbase1-monitor .
-if errorlevel 1 (
-    echo.
-    echo  ERROR: Failed to build the system monitor
-    echo  Please check that all files are present
-    echo.
-    pause
-    exit /b 1
-)
 
-echo  ✓ Build successful, starting container...
-docker run -d --name starbase1_system_monitor -p 8080:8080 -e CONTAINER_MODE=true --restart unless-stopped starbase1-monitor
+REM Check if docker-compose is available
+docker-compose --version >nul 2>&1
 if errorlevel 1 (
-    echo.
-    echo  ERROR: Failed to start the system monitor
-    echo  Please check Docker Desktop is running and try again
-    echo.
-    pause
-    exit /b 1
+    echo  Docker Compose not found, using docker run instead...
+    echo  Building image locally...
+    docker build -t starbase1-monitor .
+    if errorlevel 1 (
+        echo.
+        echo  ERROR: Failed to build the system monitor
+        echo  Please check that all files are present
+        echo.
+        pause
+        exit /b 1
+    )
+    
+    echo  ✓ Build successful, starting container...
+    docker run -d --name starbase1_system_monitor -p 8080:8080 -e CONTAINER_MODE=true -e DISABLE_HARDWARE_MONITORING=true -e DISABLE_TEMPERATURE_MONITORING=true --restart unless-stopped starbase1-monitor
+    if errorlevel 1 (
+        echo.
+        echo  ERROR: Failed to start the system monitor
+        echo  Please check Docker Desktop is running and try again
+        echo.
+        pause
+        exit /b 1
+    )
+) else (
+    echo  Using Docker Compose for Windows compatibility...
+    docker-compose -f docker-compose.windows.yml up -d --build
+    if errorlevel 1 (
+        echo.
+        echo  ERROR: Failed to start the system monitor
+        echo  Please check Docker Desktop is running and try again
+        echo.
+        pause
+        exit /b 1
+    )
 )
 echo  ✓ Container started successfully
 

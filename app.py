@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Starbase1_IO Flask Application
+Starbase1 System Monitor Flask Application
 Professional security monitoring dashboard
 """
 

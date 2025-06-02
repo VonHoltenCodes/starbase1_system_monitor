@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Starbase1_IO CLI Terminal Interface Startup Script
+# Starbase1 System Monitor Startup Script
 # This script starts the Flask development server as a background process
 
-cd /home/traxx/starbase1_IO
+cd /home/traxx/starbase1_system_monitor
 
-echo ">>> Starting Starbase1_IO CLI Terminal Interface..."
+echo ">>> Starting Starbase1 System Monitor..."
 
 # Kill any existing processes on port 5000
 echo "VonHolten2025" | sudo -S lsof -ti:5000 | xargs sudo kill -9 2>/dev/null
@@ -21,7 +21,7 @@ sleep 3
 if ps -p $PID > /dev/null; then
     echo ">>> Server started successfully (PID: $PID)"
     echo ">>> Dashboard: http://localhost:5000"
-    echo ">>> Log file: /home/traxx/starbase1_IO/starbase1_io.log"
+    echo ">>> Log file: /home/traxx/starbase1_system_monitor/starbase1_io.log"
     echo ">>> To stop: kill $PID"
     echo "$PID" > starbase1_io.pid
 else

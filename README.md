@@ -1,21 +1,8 @@
-# Starbase1_IO System Monitor
-
-⚠️ **DEVELOPMENT VERSION - USE WITH CAUTION** ⚠️
+# Starbase1 System Monitor
 
 A retro Windows 95-themed system monitoring dashboard that runs in Docker containers. Monitor your system's performance with authentic 90s nostalgia!
 
-## 🚧 Current Status: IN DEVELOPMENT
-
-This project is currently under active development. The Windows installer has known issues with Docker detection that are being debugged.
-
-### Known Issues:
-- Windows `install.bat` fails to detect Docker Desktop even when running
-- Docker detection logic needs debugging on Windows systems
-- Container startup may fail due to detection issues
-
-**For testing:** Use manual Docker commands until installer is fixed.
-
-![Starbase1_IO Dashboard](https://via.placeholder.com/800x600/c0c0c0/000000?text=Windows+95+System+Monitor)
+![Starbase1 System Monitor Dashboard](https://github.com/VonHoltenCodes/starbase1_system_monitor/blob/main/docs/dashboard-preview.png?raw=true)
 
 ## Features
 
@@ -28,21 +15,18 @@ This project is currently under active development. The Windows installer has kn
 
 ## Quick Start
 
-### Windows (⚠️ KNOWN ISSUES)
+### Windows
 **Prerequisites:** Install Docker Desktop from https://www.docker.com/products/docker-desktop
 
-**Current Status:** The Windows installer has Docker detection issues. Use manual installation below.
+1. Run `test_windows_docker.bat` to verify your Docker setup
+2. Run `install.bat` to install the system monitor
+3. The dashboard will automatically open at http://localhost:8080
 
-~~1. Download and double-click `install.bat`~~
-~~2. The installer will guide you through Docker setup if needed~~
-~~3. The dashboard will automatically open in your browser~~
+**Note:** Windows users should refer to [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed setup instructions and troubleshooting.
 
-**Manual Installation for Windows:**
+For manual installation or if the installer fails:
 ```cmd
-git clone https://github.com/VonHoltenCodes/starbase1_system_monitor.git
-cd starbase1_system_monitor
-docker build -t starbase1-monitor .
-docker run -d --name starbase1_system_monitor -p 8080:8080 starbase1-monitor
+docker-compose -f docker-compose.windows.yml up -d --build
 ```
 
 ### macOS

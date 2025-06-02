@@ -20,27 +20,40 @@ class SystemCollector:
     def get_cpu_info(self) -> Dict[str, Any]:
         """Get detailed CPU information"""
         try:
-            # Get CPU info from /proc/cpuinfo
             cpu_info = {}
-            with open('/proc/cpuinfo', 'r') as f:
-                for line in f:
-                    if ':' in line:
-                        key, value = line.split(':', 1)
-                        key = key.strip()
-                        if key == 'model name':
-                            cpu_info['model'] = value.strip()
-                        elif key == 'cpu MHz':
-                            cpu_info['current_mhz'] = float(value.strip())
-                        elif key == 'cache size':
-                            cpu_info['cache'] = value.strip()
-                        elif key == 'cpu cores':
-                            cpu_info['physical_cores'] = int(value.strip())
+            
+            # Check if running in container or on Windows
+            is_container = os.environ.get('CONTAINER_MODE', 'false').lower() == 'true'
+            disable_hardware = os.environ.get('DISABLE_HARDWARE_MONITORING', 'false').lower() == 'true'
+            
+            # Try to get CPU info from /proc/cpuinfo (Linux)
+            if not disable_hardware and os.path.exists('/proc/cpuinfo'):
+                try:
+                    with open('/proc/cpuinfo', 'r') as f:
+                        for line in f:
+                            if ':' in line:
+                                key, value = line.split(':', 1)
+                                key = key.strip()
+                                if key == 'model name':
+                                    cpu_info['model'] = value.strip()
+                                elif key == 'cpu MHz':
+                                    cpu_info['current_mhz'] = float(value.strip())
+                                elif key == 'cache size':
+                                    cpu_info['cache'] = value.strip()
+                                elif key == 'cpu cores':
+                                    cpu_info['physical_cores'] = int(value.strip())
+                except:
+                    pass
             
             # Get CPU frequency and usage
             cpu_freq = psutil.cpu_freq()
             cpu_percent = psutil.cpu_percent(interval=1)
             cpu_times = psutil.cpu_times()
-            load_avg = os.getloadavg()
+            # Load average is not available on Windows
+            try:
+                load_avg = os.getloadavg()
+            except AttributeError:
+                load_avg = (0, 0, 0)
             
             return {
                 'model': cpu_info.get('model', 'Unknown'),
@@ -143,6 +156,10 @@ class SystemCollector:
     def get_temperature_info(self) -> Dict[str, Any]:
         """Get system temperature information"""
         try:
+            # Check if temperature monitoring is disabled
+            if os.environ.get('DISABLE_TEMPERATURE_MONITORING', 'false').lower() == 'true':
+                return {'status': 'Temperature monitoring disabled'}
+            
             temps = {}
             
             # Try to get temperatures using psutil
@@ -181,6 +198,10 @@ class SystemCollector:
     def get_bios_info(self) -> Dict[str, Any]:
         """Get BIOS and system information"""
         try:
+            # Check if hardware monitoring is disabled
+            if os.environ.get('DISABLE_HARDWARE_MONITORING', 'false').lower() == 'true':
+                return {'status': 'Hardware monitoring disabled'}
+            
             bios_info = {}
             
             # Try to get DMI information
