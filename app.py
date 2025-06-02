@@ -23,7 +23,10 @@ try:
     from collectors.service_collector_safe import ServiceCollector
 except ImportError:
     from collectors.service_collector import ServiceCollector
-from collectors.system_collector import SystemCollector
+try:
+    from collectors.system_collector_fixed import SystemCollector
+except ImportError:
+    from collectors.system_collector import SystemCollector
 
 def create_app(config_name=None):
     """Create Flask application"""

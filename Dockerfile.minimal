@@ -1,0 +1,16 @@
+FROM python:3.11-alpine
+
+WORKDIR /app
+
+# Only install Flask - minimal dependencies
+RUN pip install flask
+
+# Copy only essential files
+COPY app_minimal.py ./
+COPY templates/ ./templates/
+COPY static/ ./static/
+
+EXPOSE 8080
+
+# Run the minimal app
+CMD ["python", "app_minimal.py"]
