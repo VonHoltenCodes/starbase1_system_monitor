@@ -11,7 +11,7 @@
 
 🎮 **Nostalgia meets modern monitoring** 🎮
 
-![Main Dashboard](screenshots/dashboard_main.png)
+![Main Dashboard](Screenshots/Entire-page.jpeg)
 
 **Created by [VonHoltenCodes](https://github.com/VonHoltenCodes)**
 
@@ -64,17 +64,21 @@
 
 <div align="center">
 
-### 📊 System Overview
-![System Overview](screenshots/system_overview.png)
+### 📊 CPU & Memory Monitoring
+![CPU & Memory](Screenshots/CPU&memory.jpeg)
 
 ### 🔐 Security Monitoring
-![Security Panel](screenshots/security_panel.png)
+![Active Users](Screenshots/active-users.jpeg)
+![Security Events](Screenshots/security-events.jpeg)
 
 ### ⚙️ Service Status
-![Service Status](screenshots/service_status.png)
+![Service Status](Screenshots/service-status.jpeg)
 
-### 📈 Performance Metrics
-![Performance](screenshots/performance_metrics.png)
+### 💾 Storage & Network
+![Storage & Network](Screenshots/storage-network.jpeg)
+
+### 🌡️ Temperature & Hardware
+![Temperature & Hardware](Screenshots/temp-hardware.jpeg)
 
 </div>
 
