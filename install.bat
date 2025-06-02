@@ -9,49 +9,35 @@ echo.
 
 REM Check if Docker is installed and running
 echo [1/4] Checking Docker installation...
-docker --version >nul 2>&1
+
+REM Use where command to check if docker exists
+where docker >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo  ⚠️  DOCKER DESKTOP REQUIRED
-    echo  ═══════════════════════════════════════════
+    echo  ❌ Docker Desktop is not installed
     echo.
-    echo  Docker Desktop is not installed or not running.
+    echo  Please install Docker Desktop from:
+    echo  https://www.docker.com/products/docker-desktop
     echo.
-    echo  📋 INSTALLATION STEPS:
-    echo  1. Go to: https://www.docker.com/products/docker-desktop
-    echo  2. Download Docker Desktop for Windows
-    echo  3. Install Docker Desktop (requires restart)
-    echo  4. Start Docker Desktop and wait for it to fully load
-    echo  5. Run this installer again
-    echo.
-    echo  💡 TIP: Look for the Docker whale icon in your system tray
-    echo     when Docker is ready to use.
-    echo.
-    
-    set /p confirm="Have you installed and started Docker Desktop? (y/n): "
-    if /i not "%confirm%"=="y" (
-        echo.
-        echo  Please install Docker Desktop first, then run this installer again.
-        echo.
-        pause
-        exit /b 1
-    )
-    
-    echo.
-    echo  Checking Docker again...
-    docker --version >nul 2>&1
-    if errorlevel 1 (
-        echo.
-        echo  ❌ Docker still not detected. Please ensure:
-        echo  • Docker Desktop is installed
-        echo  • Docker Desktop is running (check system tray)
-        echo  • Wait for Docker to fully start (can take 2-3 minutes)
-        echo.
-        pause
-        exit /b 1
-    )
+    pause
+    exit /b 1
 )
-echo  ✓ Docker is installed and running
+
+REM Check if Docker daemon is responding
+echo  ✓ Docker found, testing connection...
+for /f %%i in ('docker ps 2^>nul ^| find /c "CONTAINER"') do set docker_test=%%i
+if "%docker_test%"=="" (
+    echo.
+    echo  ❌ Docker Desktop is not running
+    echo.
+    echo  Please start Docker Desktop and wait for it to be ready
+    echo  (look for the whale icon in your system tray)
+    echo.
+    pause
+    exit /b 1
+)
+
+echo  ✓ Docker is running
 
 REM Stop and remove existing container if it exists
 echo.
