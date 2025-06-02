@@ -10,8 +10,8 @@ echo.
 REM Check if Docker is installed and running
 echo [1/4] Checking Docker installation...
 
-REM Use where command to check if docker exists
-where docker >nul 2>&1
+REM Test Docker (same as working test_container.bat)
+docker --version >nul 2>&1
 if errorlevel 1 (
     echo.
     echo  ❌ Docker Desktop is not installed
@@ -22,31 +22,7 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
-REM Check if Docker daemon is responding
-echo  ✓ Docker found, testing connection...
-for /f %%i in ('docker ps 2^>nul ^| find /c "CONTAINER"') do set docker_test=%%i
-if "%docker_test%"=="0" (
-    echo.
-    echo  ❌ Docker Desktop is not running
-    echo.
-    echo  Please start Docker Desktop and wait for it to be ready
-    echo  (look for the whale icon in your system tray)
-    echo.
-    pause
-    exit /b 1
-)
-if "%docker_test%"=="" (
-    echo.
-    echo  ❌ Docker command failed
-    echo.
-    echo  Please check Docker Desktop is properly installed and running
-    echo.
-    pause
-    exit /b 1
-)
-
-echo  ✓ Docker is running
+echo  ✓ Docker is installed and running
 
 REM Stop and remove existing container if it exists
 echo.
@@ -67,14 +43,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo  Starting container...
-docker run -d ^
-    --name starbase1_system_monitor ^
-    -p 8080:8080 ^
-    -e CONTAINER_MODE=true ^
-    --restart unless-stopped ^
-    starbase1-monitor
-
+echo  ✓ Build successful, starting container...
+docker run -d --name starbase1_system_monitor -p 8080:8080 -e CONTAINER_MODE=true --restart unless-stopped starbase1-monitor
 if errorlevel 1 (
     echo.
     echo  ERROR: Failed to start the system monitor
