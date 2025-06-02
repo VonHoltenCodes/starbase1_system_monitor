@@ -13,8 +13,16 @@ from datetime import datetime
 sys.path.append(os.path.dirname(__file__))
 
 from config import config
-from collectors.security_collector import SecurityCollector
-from collectors.service_collector import ServiceCollector
+# Use safe collectors for container compatibility
+try:
+    from collectors.security_collector_safe import SecurityCollector
+except ImportError:
+    from collectors.security_collector import SecurityCollector
+    
+try:
+    from collectors.service_collector_safe import ServiceCollector
+except ImportError:
+    from collectors.service_collector import ServiceCollector
 from collectors.system_collector import SystemCollector
 
 def create_app(config_name=None):
