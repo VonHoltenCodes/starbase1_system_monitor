@@ -12,14 +12,30 @@ class Starbase1Dashboard {
     }
     
     init() {
+        console.log('Dashboard init started');
+        
+        // Check if critical elements exist
+        const testElements = ['cpuModel', 'memoryUsed', 'memoryTotal', 'memoryPercent'];
+        testElements.forEach(id => {
+            const elem = document.getElementById(id);
+            if (!elem) {
+                console.error(`CRITICAL: Element '${id}' not found during init!`);
+            } else {
+                console.log(`Element '${id}' found: ${elem.tagName}`);
+            }
+        });
+        
         this.updateClock();
         this.startAutoRefresh();
         this.bindEvents();
         
-        // Initial data load
-        this.loadAllData();
+        // Initial data load with delay to ensure DOM is ready
+        setTimeout(() => {
+            console.log('Starting initial data load...');
+            this.loadAllData();
+        }, 100);
         
-        console.log('Starbase1_IO Dashboard initialized');
+        console.log('Starbase1 Dashboard initialized');
     }
     
     bindEvents() {

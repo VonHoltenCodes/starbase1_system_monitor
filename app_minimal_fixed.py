@@ -13,7 +13,9 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     """Main dashboard view"""
-    return render_template('dashboard.html')
+    return render_template('index.html', 
+                         app_name='Starbase1 System Monitor',
+                         refresh_interval=6000)
 
 @app.route('/debug')
 def debug():
