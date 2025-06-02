@@ -168,10 +168,6 @@ class SystemCollector:
         try:
             # Calculate uptime
             uptime_seconds = datetime.datetime.now().timestamp() - self.boot_time
-            days = int(uptime_seconds // 86400)
-            hours = int((uptime_seconds % 86400) // 3600)
-            minutes = int((uptime_seconds % 3600) // 60)
-            uptime_str = f"{days} days, {hours}:{minutes:02d}:00"
             
             return {
                 'cpu': self.get_cpu_info(),
@@ -180,7 +176,7 @@ class SystemCollector:
                 'network': self.get_network_info(),
                 'temperatures': self.get_temperature_info(),
                 'bios': self.get_bios_info(),
-                'uptime': uptime_str,
+                'uptime': int(uptime_seconds),  # Return seconds for JS formatting
                 'timestamp': datetime.datetime.now().isoformat()
             }
         except Exception as e:

@@ -74,7 +74,7 @@ def api_system():
             'version': 'F5',
             'motherboard': 'Z390 AORUS PRO'
         },
-        'uptime': '2 days, 14:30:00'
+        'uptime': 224400  # 2.6 days in seconds
     })
 
 @app.route('/api/security')
