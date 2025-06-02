@@ -8,35 +8,83 @@ echo  ===============================================
 echo.
 
 REM Check if Docker is installed and running
-echo [1/5] Checking Docker installation...
+echo [1/6] Checking Docker installation...
 docker --version >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo  ERROR: Docker Desktop is not installed or not running!
+    echo  Docker Desktop not found. Installing automatically...
     echo.
-    echo  Please install Docker Desktop from:
-    echo  https://www.docker.com/products/docker-desktop
+    echo [1.1/6] Downloading Docker Desktop installer...
+    
+    REM Create temp directory
+    if not exist "%TEMP%\starbase1" mkdir "%TEMP%\starbase1"
+    
+    REM Download Docker Desktop installer
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://desktop.docker.com/win/main/amd64/Docker%%20Desktop%%20Installer.exe' -OutFile '%TEMP%\starbase1\DockerDesktopInstaller.exe'}"
+    
+    if not exist "%TEMP%\starbase1\DockerDesktopInstaller.exe" (
+        echo.
+        echo  ERROR: Failed to download Docker Desktop installer
+        echo  Please check your internet connection and try again
+        echo.
+        pause
+        exit /b 1
+    )
+    
+    echo  ✓ Download complete
     echo.
-    echo  After installation:
-    echo  1. Start Docker Desktop
-    echo  2. Wait for it to fully start
-    echo  3. Run this installer again
+    echo [1.2/6] Installing Docker Desktop...
+    echo  This may take a few minutes and require admin privileges...
+    echo.
+    
+    REM Install Docker Desktop silently
+    "%TEMP%\starbase1\DockerDesktopInstaller.exe" install --quiet
+    
+    echo  ✓ Docker Desktop installation complete
+    echo.
+    echo [1.3/6] Starting Docker Desktop...
+    echo  Please wait while Docker starts up (this can take 2-3 minutes)...
+    
+    REM Start Docker Desktop
+    start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    
+    REM Wait for Docker to be ready (check every 10 seconds for up to 3 minutes)
+    set /a counter=0
+    :waitloop
+    timeout /t 10 >nul
+    docker --version >nul 2>&1
+    if not errorlevel 1 goto dockerready
+    set /a counter+=1
+    if %counter% lss 18 (
+        echo  Still waiting for Docker to start... (%counter%/18)
+        goto waitloop
+    )
+    
+    echo.
+    echo  WARNING: Docker Desktop is taking longer than expected to start
+    echo  Please ensure Docker Desktop is running and try again
     echo.
     pause
     exit /b 1
+    
+    :dockerready
+    echo  ✓ Docker Desktop is now running
+    
+    REM Clean up installer
+    del "%TEMP%\starbase1\DockerDesktopInstaller.exe" >nul 2>&1
 )
 echo  ✓ Docker is installed and running
 
 REM Stop and remove existing container if it exists
 echo.
-echo [2/5] Cleaning up any existing installation...
+echo [2/6] Cleaning up any existing installation...
 docker stop starbase1_system_monitor >nul 2>&1
 docker rm starbase1_system_monitor >nul 2>&1
 echo  ✓ Cleanup complete
 
 REM Pull the latest image
 echo.
-echo [3/5] Downloading Starbase1 System Monitor...
+echo [3/6] Downloading Starbase1 System Monitor...
 docker pull vonholtencodes/starbase1-monitor:latest
 if errorlevel 1 (
     echo.
@@ -50,11 +98,11 @@ echo  ✓ Download complete
 
 REM Start the container
 echo.
-echo [4/5] Starting Starbase1 System Monitor...
+echo [4/6] Starting Starbase1 System Monitor...
 docker run -d ^
     --name starbase1_system_monitor ^
     --privileged ^
-    -p 5000:5000 ^
+    -p 8080:8080 ^
     -v /proc:/host/proc:ro ^
     -v /sys:/host/sys:ro ^
     -e CONTAINER_MODE=true ^
@@ -75,7 +123,7 @@ echo  ✓ Container started successfully
 
 REM Wait for the application to be ready
 echo.
-echo [5/5] Waiting for application to start...
+echo [5/6] Waiting for application to start...
 timeout /t 5 >nul
 echo  ✓ Application is ready
 
@@ -86,7 +134,7 @@ echo   SUCCESS! Starbase1 System Monitor is running
 echo  ===============================================
 echo.
 echo   🖥️  Access your Windows 95 System Monitor at:
-echo   📊  http://localhost:5000
+echo   📊  http://localhost:8080
 echo.
 echo   Management Commands:
 echo   • To stop:    docker stop starbase1_system_monitor
@@ -101,7 +149,7 @@ echo.
 REM Ask if user wants to open browser
 set /p choice="Open in browser now? (y/n): "
 if /i "%choice%"=="y" (
-    start http://localhost:5000
+    start http://localhost:8080
 )
 
 echo.
