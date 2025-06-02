@@ -351,6 +351,20 @@ class Starbase1Dashboard {
         }
     }
     
+    updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        } else {
+            console.warn(`Element with id '${id}' not found`);
+        }
+    }
+    
+    showError(section, message) {
+        console.error(`Error in ${section}: ${message}`);
+        // Optionally update UI to show error state
+    }
+    
     handleRetry() {
         if (this.retryCount < this.maxRetries) {
             this.retryCount++;
