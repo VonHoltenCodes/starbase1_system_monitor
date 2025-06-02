@@ -137,14 +137,23 @@ start_container() {
     echo -e "${YELLOW}[4/4] Starting Starbase1 System Monitor...${NC}"
     
     # Try docker-compose first if available
-    if [[ -f "docker-compose.yml" ]]; then
+    if [[ -f "docker-compose.yml" ]] && command -v docker-compose &> /dev/null; then
         echo "Using Docker Compose..."
-        if docker-compose up -d; then
-            echo -e "${GREEN}✓ Container started with Docker Compose${NC}"
-            return 0
+        
+        # Use platform-specific compose file if on macOS
+        if [[ "$OSTYPE" == "darwin"* ]] && [[ -f "docker-compose.macos.yml" ]]; then
+            echo "Using macOS-specific configuration..."
+            if docker-compose -f docker-compose.macos.yml up -d --build; then
+                echo -e "${GREEN}✓ Container started with Docker Compose (macOS)${NC}"
+                return 0
+            fi
         else
-            echo "Docker Compose failed, building locally..."
+            if docker-compose up -d --build; then
+                echo -e "${GREEN}✓ Container started with Docker Compose${NC}"
+                return 0
+            fi
         fi
+        echo "Docker Compose failed, building locally..."
     fi
     
     # Build locally
@@ -161,18 +170,28 @@ start_container() {
         DOCKER_SOCK="-v /var/run/docker.sock:/var/run/docker.sock:ro"
     fi
     
+    # Determine platform-specific options
+    VOLUME_MOUNTS=""
+    EXTRA_ENV=""
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS doesn't have /proc or /sys
+        echo "Configuring for macOS..."
+        EXTRA_ENV="-e DISABLE_HARDWARE_MONITORING=true -e DISABLE_TEMPERATURE_MONITORING=true"
+    else
+        # Linux has these system directories
+        VOLUME_MOUNTS="-v /proc:/host/proc:ro -v /sys:/host/sys:ro -v /etc/os-release:/host/os-release:ro"
+        EXTRA_ENV="-e HOST_PROC=/host/proc -e HOST_SYS=/host/sys"
+    fi
+    
     # Start the container
     if docker run -d \
         --name starbase1_system_monitor \
-        --privileged \
         -p 8080:8080 \
-        -v /proc:/host/proc:ro \
-        -v /sys:/host/sys:ro \
-        -v /etc/os-release:/host/os-release:ro \
+        $VOLUME_MOUNTS \
         $DOCKER_SOCK \
         -e CONTAINER_MODE=true \
-        -e HOST_PROC=/host/proc \
-        -e HOST_SYS=/host/sys \
+        $EXTRA_ENV \
         --restart unless-stopped \
         starbase1-monitor:latest; then
         

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  starbase1-monitor:
+    build: .
+    container_name: starbase1_system_monitor
+    image: vonholtencodes/starbase1-monitor:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      # Docker socket for container monitoring (if available)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Container-specific environment variables
+      - CONTAINER_MODE=true
+      - REFRESH_INTERVAL=360
+      - TZ=UTC
+      # macOS-specific: Disable Linux-specific collectors
+      - DISABLE_HARDWARE_MONITORING=true
+      - DISABLE_TEMPERATURE_MONITORING=true
+    # Restart policy
+    restart: unless-stopped
+    labels:
+      - "com.vonholtencodes.app=starbase1-monitor"
+      - "com.vonholtencodes.version=1.0.0"
+      - "com.vonholtencodes.platform=macos"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
