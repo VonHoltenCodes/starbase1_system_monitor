@@ -44,7 +44,7 @@ def create_app(config_name=None):
     @app.route('/')
     def dashboard():
         """Main dashboard page"""
-        return render_template('index.html', 
+        return render_template('dashboard.html', 
                              app_name=app.config['APP_NAME'],
                              refresh_interval=app.config['REFRESH_INTERVAL'])
     

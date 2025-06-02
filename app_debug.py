@@ -64,7 +64,9 @@ def create_app(config_name=None):
     @app.route('/')
     def index():
         """Main dashboard view"""
-        return render_template('dashboard.html')
+        return render_template('dashboard.html',
+                             app_name='Starbase1 System Monitor',
+                             refresh_interval=6000)
     
     @app.route('/api/security')
     def api_security():
