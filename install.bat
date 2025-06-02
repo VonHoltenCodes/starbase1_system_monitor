@@ -46,19 +46,7 @@ docker stop starbase1_system_monitor >nul 2>&1
 docker rm starbase1_system_monitor >nul 2>&1
 echo  ✓ Cleanup complete
 
-REM Try to use docker-compose if available, otherwise build locally
-if exist "docker-compose.yml" (
-    echo  Using Docker Compose...
-    docker-compose up -d
-    if errorlevel 1 (
-        echo  Docker Compose failed, building locally...
-        goto buildlocal
-    )
-    echo  ✓ Container started with Docker Compose
-    goto waitforstart
-)
-
-:buildlocal
+echo [3/4] Building and starting Starbase1 System Monitor...
 echo  Building image locally...
 docker build -t starbase1-monitor .
 if errorlevel 1 (
@@ -69,17 +57,14 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+
+echo  Starting container...
 docker run -d ^
     --name starbase1_system_monitor ^
-    --privileged ^
     -p 8080:8080 ^
-    -v /proc:/host/proc:ro ^
-    -v /sys:/host/sys:ro ^
     -e CONTAINER_MODE=true ^
-    -e HOST_PROC=/host/proc ^
-    -e HOST_SYS=/host/sys ^
     --restart unless-stopped ^
-    vonholtencodes/starbase1-monitor:latest
+    starbase1-monitor
 
 if errorlevel 1 (
     echo.
