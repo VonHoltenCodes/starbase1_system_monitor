@@ -29,7 +29,7 @@ fi
 
 # Function to check if Docker is installed
 check_docker() {
-    echo -e "${YELLOW}[1/5] Checking Docker installation...${NC}"
+    echo -e "${YELLOW}[1/4] Checking Docker installation...${NC}"
     
     if command -v docker &> /dev/null; then
         if docker --version &> /dev/null; then
@@ -38,29 +38,60 @@ check_docker() {
         fi
     fi
     
-    echo -e "${RED}ERROR: Docker is not installed or not accessible${NC}"
+    echo -e "${RED}⚠️  DOCKER REQUIRED${NC}"
+    echo "═══════════════════════════════════════════"
     echo ""
-    echo "Please install Docker first:"
+    echo "Docker is not installed or not accessible."
+    echo ""
+    echo -e "${BLUE}📋 INSTALLATION STEPS:${NC}"
     
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "• Download Docker Desktop for Mac: https://docs.docker.com/desktop/mac/install/"
+        echo "1. Go to: https://www.docker.com/products/docker-desktop"
+        echo "2. Download Docker Desktop for Mac"
+        echo "3. Install and start Docker Desktop"
     else
-        echo "• Ubuntu/Debian: sudo apt update && sudo apt install docker.io"
-        echo "• CentOS/RHEL: sudo yum install docker"
-        echo "• Arch: sudo pacman -S docker"
-        echo "• Or visit: https://docs.docker.com/engine/install/"
+        echo "1. Install Docker for your distribution:"
+        echo "   • Ubuntu/Debian: sudo apt update && sudo apt install docker.io"
+        echo "   • CentOS/RHEL: sudo yum install docker"
+        echo "   • Arch: sudo pacman -S docker"
+        echo "   • Other: https://docs.docker.com/engine/install/"
+        echo ""
+        echo "2. Add your user to docker group:"
+        echo "   sudo usermod -aG docker \$USER"
+        echo "   newgrp docker"
+        echo ""
+        echo "3. Start Docker service:"
+        echo "   sudo systemctl enable --now docker"
     fi
     
     echo ""
-    echo "After installation, make sure your user is in the docker group:"
-    echo "sudo usermod -aG docker \$USER"
-    echo "Then log out and log back in."
-    exit 1
+    echo -e "${YELLOW}💡 TIP: After installation, log out and back in for group changes${NC}"
+    echo ""
+    
+    read -p "Have you installed and started Docker? (y/n): " -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "Please install Docker first, then run this installer again."
+        exit 1
+    fi
+    
+    echo ""
+    echo "Checking Docker again..."
+    if command -v docker &> /dev/null && docker --version &> /dev/null; then
+        echo -e "${GREEN}✓ Docker is now installed${NC}"
+    else
+        echo -e "${RED}❌ Docker still not detected. Please ensure:${NC}"
+        echo "• Docker is installed"
+        echo "• Your user is in the docker group"
+        echo "• You've logged out and back in"
+        echo "• Docker service is running"
+        exit 1
+    fi
 }
 
 # Function to check if Docker daemon is running
 check_docker_running() {
-    echo -e "${YELLOW}[2/5] Checking if Docker daemon is running...${NC}"
+    echo -e "${YELLOW}[2/4] Checking if Docker daemon is running...${NC}"
     
     if docker info &> /dev/null; then
         echo -e "${GREEN}✓ Docker daemon is running${NC}"
@@ -90,7 +121,7 @@ check_docker_running() {
 
 # Function to clean up existing installation
 cleanup_existing() {
-    echo -e "${YELLOW}[3/5] Cleaning up any existing installation...${NC}"
+    echo -e "${YELLOW}[3/4] Cleaning up any existing installation...${NC}"
     
     if docker ps -a --format "table {{.Names}}" | grep -q "starbase1_system_monitor"; then
         echo "Stopping and removing existing container..."
@@ -101,22 +132,28 @@ cleanup_existing() {
     echo -e "${GREEN}✓ Cleanup complete${NC}"
 }
 
-# Function to pull the Docker image
-pull_image() {
-    echo -e "${YELLOW}[4/5] Downloading Starbase1 System Monitor...${NC}"
-    
-    if docker pull vonholtencodes/starbase1-monitor:latest; then
-        echo -e "${GREEN}✓ Download complete${NC}"
-    else
-        echo -e "${RED}ERROR: Failed to download the application image${NC}"
-        echo "Please check your internet connection and try again"
-        exit 1
-    fi
-}
-
 # Function to start the container
 start_container() {
-    echo -e "${YELLOW}[5/5] Starting Starbase1 System Monitor...${NC}"
+    echo -e "${YELLOW}[4/4] Starting Starbase1 System Monitor...${NC}"
+    
+    # Try docker-compose first if available
+    if [[ -f "docker-compose.yml" ]]; then
+        echo "Using Docker Compose..."
+        if docker-compose up -d; then
+            echo -e "${GREEN}✓ Container started with Docker Compose${NC}"
+            return 0
+        else
+            echo "Docker Compose failed, building locally..."
+        fi
+    fi
+    
+    # Build locally
+    echo "Building image locally..."
+    if ! docker build -t starbase1-monitor .; then
+        echo -e "${RED}ERROR: Failed to build the system monitor${NC}"
+        echo "Please check that all files are present"
+        exit 1
+    fi
     
     # Determine the correct Docker socket path
     DOCKER_SOCK=""
@@ -128,7 +165,7 @@ start_container() {
     if docker run -d \
         --name starbase1_system_monitor \
         --privileged \
-        -p 5000:5000 \
+        -p 8080:8080 \
         -v /proc:/host/proc:ro \
         -v /sys:/host/sys:ro \
         -v /etc/os-release:/host/os-release:ro \
@@ -137,7 +174,7 @@ start_container() {
         -e HOST_PROC=/host/proc \
         -e HOST_SYS=/host/sys \
         --restart unless-stopped \
-        vonholtencodes/starbase1-monitor:latest; then
+        starbase1-monitor:latest; then
         
         echo -e "${GREEN}✓ Container started successfully${NC}"
         
@@ -162,7 +199,7 @@ show_success() {
     echo -e "${NC}"
     echo ""
     echo -e "${BLUE}🖥️  Access your Windows 95 System Monitor at:${NC}"
-    echo -e "${BLUE}📊  http://localhost:5000${NC}"
+    echo -e "${BLUE}📊  http://localhost:8080${NC}"
     echo ""
     echo "Management Commands:"
     echo "• To stop:    docker stop starbase1_system_monitor"
@@ -180,9 +217,9 @@ show_success() {
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             if [[ "$OSTYPE" == "darwin"* ]]; then
-                open http://localhost:5000
+                open http://localhost:8080
             elif command -v xdg-open &> /dev/null; then
-                xdg-open http://localhost:5000
+                xdg-open http://localhost:8080
             fi
         fi
     fi
@@ -196,7 +233,6 @@ main() {
     check_docker
     check_docker_running
     cleanup_existing
-    pull_image
     start_container
     show_success
 }
