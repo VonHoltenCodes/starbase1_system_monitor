@@ -33,7 +33,7 @@ def create_app(config_name=None):
     @app.route('/')
     def dashboard():
         """Main dashboard page"""
-        return render_template('dashboard.html', 
+        return render_template('index.html', 
                              app_name=app.config['APP_NAME'],
                              refresh_interval=app.config['REFRESH_INTERVAL'])
     
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     container_mode = os.environ.get('CONTAINER_MODE', 'false').lower() == 'true'
     
     # Get port from environment or command line
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8080))
     if len(sys.argv) > 1 and '--port=' in sys.argv[1]:
         try:
             port = int(sys.argv[1].split('=')[1])

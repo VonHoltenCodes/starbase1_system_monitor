@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - System Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/starbase.css') }}">
+</head>
+<body>
+    <!-- Windows 95 Main Window -->
+    <div class="main-window">
+        <!-- Title Bar -->
+        <div class="window-title-bar">
+            <span>🖥️ {{ app_name }} - System Monitor</span>
+            <div class="window-controls">
+                <div class="window-button">_</div>
+                <div class="window-button">□</div>
+                <div class="window-button">×</div>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-item">File</div>
+            <div class="menu-item">View</div>
+            <div class="menu-item">Options</div>
+            <div class="menu-item">Help</div>
+        </div>
+
+        <!-- Window Content -->
+        <div class="window-content">
+            <div class="main-grid">
+                <!-- System Overview Section -->
+                <div class="section-panel">
+                    <div class="section-header">💻 SYSTEM OVERVIEW</div>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <span class="label">Hostname:</span>
+                            <span class="value" id="hostname">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">OS:</span>
+                            <span class="value" id="os-info">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Uptime:</span>
+                            <span class="value" id="uptime">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Load Average:</span>
+                            <span class="value" id="load-avg">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CPU & Memory Section -->
+                <div class="section-panel">
+                    <div class="section-header">⚡ CPU & MEMORY</div>
+                    <div class="metric-display">
+                        <div class="metric-item">
+                            <div class="metric-label">CPU Usage</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="cpu-progress" style="width: 0%"></div>
+                                <div class="progress-text" id="cpu-percent">0%</div>
+                            </div>
+                            <div class="metric-detail" id="cpu-cores">Cores: Loading...</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Memory Usage</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="memory-progress" style="width: 0%"></div>
+                                <div class="progress-text" id="memory-percent">0%</div>
+                            </div>
+                            <div class="metric-detail" id="memory-detail">RAM: Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Storage Section -->
+                <div class="section-panel">
+                    <div class="section-header">💾 STORAGE</div>
+                    <div class="disk-list" id="disk-info">
+                        <div class="loading">Loading disk information...</div>
+                    </div>
+                </div>
+
+                <!-- Temperatures & Hardware -->
+                <div class="section-panel">
+                    <div class="section-header">🌡️ TEMPERATURES</div>
+                    <div class="temp-grid" id="temp-info">
+                        <div class="loading">Loading temperature data...</div>
+                    </div>
+                </div>
+
+                <!-- BIOS Information -->
+                <div class="section-panel">
+                    <div class="section-header">🔧 BIOS INFO</div>
+                    <div class="bios-info" id="bios-info">
+                        <div class="loading">Loading BIOS information...</div>
+                    </div>
+                </div>
+
+                <!-- Active Users -->
+                <div class="section-panel">
+                    <div class="section-header">👥 ACTIVE USERS</div>
+                    <div class="user-list" id="user-list">
+                        <div class="loading">Loading user information...</div>
+                    </div>
+                </div>
+
+                <!-- Security Events -->
+                <div class="section-panel">
+                    <div class="section-header">🚨 SECURITY EVENTS</div>
+                    <div class="security-summary" id="security-info">
+                        <div class="loading">Loading security data...</div>
+                    </div>
+                </div>
+
+                <!-- Service Status -->
+                <div class="section-panel">
+                    <div class="section-header">⚙️ SERVICE STATUS</div>
+                    <div class="service-grid" id="service-status">
+                        <div class="loading">Loading service information...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="system-status">🟢 ONLINE</span>
+            </div>
+            <div class="status-right">
+                <span id="current-time">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="start-button">
+            <span>🖥️ Start</span>
+        </div>
+        <div class="task-items">
+            <div class="task-item active">
+                <span>Starbase1_IO - System Monitor</span>
+            </div>
+        </div>
+        <div class="system-tray">
+            <span id="taskbar-time">Loading...</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
