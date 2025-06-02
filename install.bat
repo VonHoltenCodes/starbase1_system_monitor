@@ -33,7 +33,7 @@ echo  ✓ Cleanup complete
 
 echo [3/4] Building and starting Starbase1 System Monitor...
 echo  Building image locally...
-docker build -f Dockerfile.windows -t starbase1-monitor .
+docker build -t starbase1-monitor .
 if errorlevel 1 (
     echo.
     echo  ERROR: Failed to build the system monitor
