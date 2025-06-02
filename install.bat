@@ -1,142 +1,88 @@
 @echo off
 cls
-
-REM Check for admin privileges
-net session >nul 2>&1
-if errorlevel 1 (
-    echo.
-    echo  ===============================================
-    echo   Starbase1 System Monitor - Windows Installer
-    echo   Windows 95 Style System Monitoring Dashboard
-    echo  ===============================================
-    echo.
-    echo  This installer needs Administrator privileges to install Docker Desktop.
-    echo  Requesting administrator access...
-    echo.
-    
-    REM Re-run as admin
-    powershell -Command "Start-Process '%~f0' -Verb RunAs" 2>nul
-    if errorlevel 1 (
-        echo  ERROR: Could not request administrator privileges
-        echo  Please right-click this file and select "Run as administrator"
-        echo.
-        pause
-        exit /b 1
-    )
-    exit /b
-)
-
 echo.
 echo  ===============================================
 echo   Starbase1 System Monitor - Windows Installer
 echo   Windows 95 Style System Monitoring Dashboard
 echo  ===============================================
 echo.
-echo  Running with Administrator privileges...
 
 REM Check if Docker is installed and running
-echo [1/6] Checking Docker installation...
+echo [1/4] Checking Docker installation...
 docker --version >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo  Docker Desktop not found. Installing automatically...
+    echo  ⚠️  DOCKER DESKTOP REQUIRED
+    echo  ═══════════════════════════════════════════
     echo.
-    echo [1.1/6] Downloading Docker Desktop installer...
+    echo  Docker Desktop is not installed or not running.
+    echo.
+    echo  📋 INSTALLATION STEPS:
+    echo  1. Go to: https://www.docker.com/products/docker-desktop
+    echo  2. Download Docker Desktop for Windows
+    echo  3. Install Docker Desktop (requires restart)
+    echo  4. Start Docker Desktop and wait for it to fully load
+    echo  5. Run this installer again
+    echo.
+    echo  💡 TIP: Look for the Docker whale icon in your system tray
+    echo     when Docker is ready to use.
+    echo.
     
-    REM Create temp directory
-    if not exist "%TEMP%\starbase1" mkdir "%TEMP%\starbase1"
-    
-    REM Download Docker Desktop installer
-    powershell -Command "& {Invoke-WebRequest -Uri 'https://desktop.docker.com/win/main/amd64/Docker%%20Desktop%%20Installer.exe' -OutFile '%TEMP%\starbase1\DockerDesktopInstaller.exe'}"
-    
-    if not exist "%TEMP%\starbase1\DockerDesktopInstaller.exe" (
+    set /p confirm="Have you installed and started Docker Desktop? (y/n): "
+    if /i not "%confirm%"=="y" (
         echo.
-        echo  ERROR: Failed to download Docker Desktop installer
-        echo  Please check your internet connection and try again
+        echo  Please install Docker Desktop first, then run this installer again.
         echo.
         pause
         exit /b 1
     )
     
-    echo  ✓ Download complete
     echo.
-    echo [1.2/6] Installing Docker Desktop...
-    echo  This may take a few minutes and require admin privileges...
-    echo.
-    
-    REM Install Docker Desktop silently
-    echo  Running Docker Desktop installer...
-    "%TEMP%\starbase1\DockerDesktopInstaller.exe" install --quiet
-    
+    echo  Checking Docker again...
+    docker --version >nul 2>&1
     if errorlevel 1 (
         echo.
-        echo  ERROR: Docker Desktop installation failed
-        echo  You may need to install it manually from:
-        echo  https://www.docker.com/products/docker-desktop
+        echo  ❌ Docker still not detected. Please ensure:
+        echo  • Docker Desktop is installed
+        echo  • Docker Desktop is running (check system tray)
+        echo  • Wait for Docker to fully start (can take 2-3 minutes)
         echo.
         pause
         exit /b 1
     )
-    
-    echo  ✓ Docker Desktop installation complete
-    echo.
-    echo [1.3/6] Starting Docker Desktop...
-    echo  Please wait while Docker starts up (this can take 2-3 minutes)...
-    
-    REM Start Docker Desktop
-    start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-    
-    REM Wait for Docker to be ready (check every 10 seconds for up to 3 minutes)
-    set /a counter=0
-    :waitloop
-    timeout /t 10 >nul
-    docker --version >nul 2>&1
-    if not errorlevel 1 goto dockerready
-    set /a counter+=1
-    if %counter% lss 18 (
-        echo  Still waiting for Docker to start... (%counter%/18)
-        goto waitloop
-    )
-    
-    echo.
-    echo  WARNING: Docker Desktop is taking longer than expected to start
-    echo  Please ensure Docker Desktop is running and try again
-    echo.
-    pause
-    exit /b 1
-    
-    :dockerready
-    echo  ✓ Docker Desktop is now running
-    
-    REM Clean up installer
-    del "%TEMP%\starbase1\DockerDesktopInstaller.exe" >nul 2>&1
 )
 echo  ✓ Docker is installed and running
 
 REM Stop and remove existing container if it exists
 echo.
-echo [2/6] Cleaning up any existing installation...
+echo [2/4] Cleaning up any existing installation...
 docker stop starbase1_system_monitor >nul 2>&1
 docker rm starbase1_system_monitor >nul 2>&1
 echo  ✓ Cleanup complete
 
-REM Pull the latest image
-echo.
-echo [3/6] Downloading Starbase1 System Monitor...
-docker pull vonholtencodes/starbase1-monitor:latest
+REM Try to use docker-compose if available, otherwise build locally
+if exist "docker-compose.yml" (
+    echo  Using Docker Compose...
+    docker-compose up -d
+    if errorlevel 1 (
+        echo  Docker Compose failed, building locally...
+        goto buildlocal
+    )
+    echo  ✓ Container started with Docker Compose
+    goto waitforstart
+)
+
+:buildlocal
+echo  Building image locally...
+docker build -t starbase1-monitor .
 if errorlevel 1 (
     echo.
-    echo  ERROR: Failed to download the application image
-    echo  Please check your internet connection and try again
+    echo  ERROR: Failed to build the system monitor
+    echo  Please check that all files are present
     echo.
     pause
     exit /b 1
 )
-echo  ✓ Download complete
-
-REM Start the container
-echo.
-echo [4/6] Starting Starbase1 System Monitor...
 docker run -d ^
     --name starbase1_system_monitor ^
     --privileged ^
@@ -159,9 +105,10 @@ if errorlevel 1 (
 )
 echo  ✓ Container started successfully
 
+:waitforstart
 REM Wait for the application to be ready
 echo.
-echo [5/6] Waiting for application to start...
+echo [4/4] Waiting for application to start...
 timeout /t 5 >nul
 echo  ✓ Application is ready
 

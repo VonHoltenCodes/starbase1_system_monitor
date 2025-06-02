@@ -16,19 +16,25 @@ A retro Windows 95-themed system monitoring dashboard that runs in Docker contai
 ## Quick Start
 
 ### Windows
+**Prerequisites:** Install Docker Desktop from https://www.docker.com/products/docker-desktop
+
 1. Download and double-click `install.bat`
-2. Follow the prompts to install Docker Desktop if needed
+2. The installer will guide you through Docker setup if needed
 3. The dashboard will automatically open in your browser
 
 ### macOS
+**Prerequisites:** Install Docker Desktop from https://www.docker.com/products/docker-desktop
+
 1. Download and double-click `install.command`
-2. Follow the prompts to install Docker Desktop if needed
+2. The installer will guide you through Docker setup if needed
 3. The dashboard will automatically open in your browser
 
 ### Linux
+**Prerequisites:** Install Docker Engine from https://docs.docker.com/engine/install/
+
 1. Download `install.sh`
 2. Run: `chmod +x install.sh && ./install.sh`
-3. Follow the prompts to install Docker if needed
+3. The installer will guide you through Docker setup if needed
 4. Open http://localhost:8080 in your browser
 
 ## Manual Installation
