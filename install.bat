@@ -26,12 +26,21 @@ if errorlevel 1 (
 REM Check if Docker daemon is responding
 echo  ✓ Docker found, testing connection...
 for /f %%i in ('docker ps 2^>nul ^| find /c "CONTAINER"') do set docker_test=%%i
-if "%docker_test%"=="" (
+if "%docker_test%"=="0" (
     echo.
     echo  ❌ Docker Desktop is not running
     echo.
     echo  Please start Docker Desktop and wait for it to be ready
     echo  (look for the whale icon in your system tray)
+    echo.
+    pause
+    exit /b 1
+)
+if "%docker_test%"=="" (
+    echo.
+    echo  ❌ Docker command failed
+    echo.
+    echo  Please check Docker Desktop is properly installed and running
     echo.
     pause
     exit /b 1
