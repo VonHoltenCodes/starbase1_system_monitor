@@ -1,11 +1,38 @@
 @echo off
 cls
+
+REM Check for admin privileges
+net session >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo  ===============================================
+    echo   Starbase1 System Monitor - Windows Installer
+    echo   Windows 95 Style System Monitoring Dashboard
+    echo  ===============================================
+    echo.
+    echo  This installer needs Administrator privileges to install Docker Desktop.
+    echo  Requesting administrator access...
+    echo.
+    
+    REM Re-run as admin
+    powershell -Command "Start-Process '%~f0' -Verb RunAs" 2>nul
+    if errorlevel 1 (
+        echo  ERROR: Could not request administrator privileges
+        echo  Please right-click this file and select "Run as administrator"
+        echo.
+        pause
+        exit /b 1
+    )
+    exit /b
+)
+
 echo.
 echo  ===============================================
 echo   Starbase1 System Monitor - Windows Installer
 echo   Windows 95 Style System Monitoring Dashboard
 echo  ===============================================
 echo.
+echo  Running with Administrator privileges...
 
 REM Check if Docker is installed and running
 echo [1/6] Checking Docker installation...
@@ -38,7 +65,18 @@ if errorlevel 1 (
     echo.
     
     REM Install Docker Desktop silently
+    echo  Running Docker Desktop installer...
     "%TEMP%\starbase1\DockerDesktopInstaller.exe" install --quiet
+    
+    if errorlevel 1 (
+        echo.
+        echo  ERROR: Docker Desktop installation failed
+        echo  You may need to install it manually from:
+        echo  https://www.docker.com/products/docker-desktop
+        echo.
+        pause
+        exit /b 1
+    )
     
     echo  ✓ Docker Desktop installation complete
     echo.
